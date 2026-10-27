@@ -1,6 +1,15 @@
 # RXDK-Xenon2
 
-Xenon 2 Megablast (the 1991 CDTV release) on the original Xbox, built with RXDK.
+<p align="center"><b>Xenon 2 Megablast (the 1991 CDTV release) on the original Xbox — the Bitmap Brothers' own 68000 code recompiled to C++, with native sound and the Bomb the Bass CD soundtrack, built with RXDK</b></p>
+
+<p align="center">
+  <a href="https://discord.gg/VcdSfajQGK"><img src="https://img.shields.io/badge/chat-on%20discord-7289da.svg?logo=discord" alt="Discord"></a>
+</p>
+
+<p align="center">
+  <a href="https://ko-fi.com/J3J7L5UMN"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="ko-fi"></a>
+  <a href="https://www.patreon.com/teamresurgent"><img src="https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white" alt="Patreon"></a>
+</p>
 
 The Bitmap Brothers' own 68000 code is statically recompiled to C++: the
 game logic is the original. The Amiga hardware it talks to is replaced by
