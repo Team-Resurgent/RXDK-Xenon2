@@ -2,9 +2,11 @@
 """Build Xenon 2 for the original Xbox from your own CDTV install.
 
   python tools/build.py --install <Xenon2_v1.7_CDTV.lha | folder>   (once)
+  python tools/build.py --music <Xenon2Audio_v0.2b_BETA.lha>         (once, for music)
   python tools/build.py
 
-1. extract.py: game/data (your files) and build/image.bin (X2 at $400)
+1. extract.py: game/data (your files) and build/image.bin (X2 at $400);
+   music.py: game/music (the CD music)
 2. recompile.py: the 68000 code as C++ in build/m68k
 3. the RXDK projects (gamecode: the generated code; the title: the runtime)
    and the RXDK build: out/xenon2.xbe and out/XISO/xenon2.iso
@@ -66,12 +68,13 @@ def projects() -> None:
     write_project(ROOT, {
         "name": "xenon2", "configuration": "release",
         "sources": [rel(p, ROOT) for p in runtime],
-        "includePaths": ["src", "build/m68k"],
+        "includePaths": ["src", "build/m68k", "third_party"],
         "projectReferences": ["gamecode"],
         "libraries": LIBRARIES,
         "compileFlags": FLAGS,
         "cppStandard": "c++20", "outputDir": "out",
         "deployPaths": ["image.bin=build/image.bin", "data=game/data"]
+        + (["music=game/music"] if (ROOT / "game/music").exists() else [])
         # A test input script (src/platform/xbox/main.cpp), only when there is one.
         + (["inputs.txt=build/inputs.txt"] if (BUILD / "inputs.txt").exists() else []),
         "imageBuild": {"testName": "Xenon 2 Megablast"}})
@@ -80,12 +83,15 @@ def projects() -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--install", type=Path, help="your Xenon 2 CDTV WHDLoad install (.lha or folder), once")
+    parser.add_argument("--music", type=Path, help="the Xenon2Audio add-on (.lha, folder or BTB.8svx), once")
     parser.add_argument("--no-xbox", action="store_true", help="stop after recompiling")
     args = parser.parse_args()
     if args.install or not (ROOT / "game/data/X2").exists() or not (BUILD / "image.bin").exists():
         if not args.install:
             sys.exit("build: give your Xenon 2 CDTV install with --install (Xenon2_v1.7_CDTV.lha)")
         run([sys.executable, ROOT / "tools/extract.py", args.install])
+    if args.music:
+        run([sys.executable, ROOT / "tools/music.py", args.music])
     run([sys.executable, ROOT / "tools/recompile.py"])
     if args.no_xbox:
         return 0

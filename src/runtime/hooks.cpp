@@ -1,7 +1,9 @@
 // Native code in place of the game's OS calls (config/xenon2.json patches,
-// after the WHDLoad slave's): loading files from the CD, and the CD audio.
+// after the WHDLoad slave's): loading files from the CD, the CD audio, and
+// starting the sound effects and speech.
 #include "runtime/cpu.h"
 #include "runtime/platform.h"
+#include "runtime/sound.h"
 
 #include <cctype>
 #include <cstring>
@@ -49,6 +51,7 @@ void hook_load_file(u32 dest) {
 void hook_cd_play() {
     const u32 track = R.d[0] & 0xFFFF;
     wl(kCdTrack, track);
+    sound_music(int(track));
     platform_log("hooks: CD play track %u\n", track);
 }
 
@@ -57,8 +60,48 @@ void hook_cd_poll() {}
 void hook_cd_stop() {
     if (s32(rl(kCdTrack)) >= 0) platform_log("hooks: CD stop\n");
     wl(kCdTrack, 0xFFFFFFFF);
+    sound_music(-1);
 }
 
-void hook_cd_fade_in() { platform_log("hooks: CD volume up\n"); }
+void hook_cd_fade_in() {
+    sound_music_fade(true);
+    platform_log("hooks: CD volume up\n");
+}
 
-void hook_cd_fade_out() { platform_log("hooks: CD volume down\n"); }
+void hook_cd_fade_out() {
+    sound_music_fade(false);
+    platform_log("hooks: CD volume down\n");
+}
+
+void hook_sound_voice() {
+    // The game's start of a sound ($3351E, from its player at $334B6): a0 =
+    // the voice's request ({w sample, w x 0-$140, b go}), a3 = the sound
+    // bank (12-byte entries: offset, length in words, volume, period, 1 =
+    // loops), d0 = the voice's DMA bits (3: channels 0 and 1, $C: 3 and 2).
+    // The sound's screen position shares its volume between the left and
+    // right channel, as the game works it out.
+    const u32 request = R.a[0];
+    const u16 number = rw(request);
+    s16 x = s16(rw(request + 2));
+    wb(request + 4, 0);
+    ww(request, 0xFFFF);
+    const u32 entry = R.a[3] + u32(number) * 12;
+    if (rl(entry) == 0xFFFFFFFF) return;
+    if (x < 0) x = 0;
+    if (x > 0x140) x = 0x140;
+    const u16 volume = rw(entry + 6);
+    u16 right = u16(((u32(x) * volume & 0xFFFF) * 0xCC + 0x8000) >> 16);
+    u16 left = u16(volume - right);
+    if (right >= 0x40) right = 0x40;
+    if (left >= 0x40) left = 0x40;
+    const u32 data = (R.a[3] + rl(entry)) & 0xFFFFFF;
+    u32 bytes = (rw(entry + 4) ? rw(entry + 4) : 0x10000) * 2;
+    if (data >= kChipSize) return;
+    if (data + bytes > kChipSize) bytes = kChipSize - data;
+    const int voice = (R.d[0] & 0xFFFF) == 3 ? 0 : 1;
+    static int logged;
+    if (logged++ < 40)
+        platform_log("hooks: sound %u on voice %d (%u bytes, period %u, volume %u/%u%s)\n", number, voice, bytes,
+                     rw(entry + 8), left, right, rw(entry + 10) == 1 ? ", loops" : "");
+    sound_play(voice, reinterpret_cast<const s8 *>(MEM + data), bytes, rw(entry + 8), left, right, rw(entry + 10) == 1);
+}

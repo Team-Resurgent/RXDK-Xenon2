@@ -86,7 +86,7 @@ XINPUT_GAMEPAD read_pad() {
     return pad;
 }
 
-void draw(const uint32_t *pixels, int width, int height) {
+void draw(const uint32_t *pixels, int width, int height, int top, int bottom) {
     D3DLOCKED_RECT locked;
     if (SUCCEEDED(g_screen->LockRect(0, &locked, nullptr, 0))) {
         for (int y = 0; y < height; ++y)
@@ -94,12 +94,17 @@ void draw(const uint32_t *pixels, int width, int height) {
                         size_t(width) * 4);
         g_screen->UnlockRect(0);
     }
+    // The whole frame at the same scale as before, moved so the display
+    // window's rows sit in the middle of the screen.
     struct Vertex { float x, y, z, rhw, u, v; };
     const float w = float(width), h = float(height);
+    const float scale = kHeight / h;
+    const float y0 = kHeight * .5f - (top + bottom) * .5f * scale - .5f, y1 = y0 + kHeight;
     const Vertex quad[4] = {
-        {-.5f, -.5f, 0, 1, 0, 0}, {kWidth - .5f, -.5f, 0, 1, w, 0},
-        {-.5f, kHeight - .5f, 0, 1, 0, h}, {kWidth - .5f, kHeight - .5f, 0, 1, w, h},
+        {-.5f, y0, 0, 1, 0, 0}, {kWidth - .5f, y0, 0, 1, w, 0},
+        {-.5f, y1, 0, 1, 0, h}, {kWidth - .5f, y1, 0, 1, w, h},
     };
+    g_device->Clear(0, nullptr, D3DCLEAR_TARGET, 0, 1.0f, 0);
     g_device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
     g_device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
     g_device->SetRenderState(D3DRS_LIGHTING, FALSE);
@@ -222,8 +227,13 @@ Joystick platform_joystick() {
     return j;
 }
 
-void platform_frame(const uint32_t *pixels, int width, int height) {
-    draw(pixels, width, height);
+void platform_frame(const uint32_t *pixels, int width, int height, int top, int bottom) {
+    draw(pixels, width, height, top, bottom);
+    static int shown_top = -1, shown_bottom = -1, changes;
+    if ((top != shown_top || bottom != shown_bottom) && changes++ < 50)
+        platform_log("xenon2: picture rows %d-%d\n", top, bottom);
+    shown_top = top;
+    shown_bottom = bottom;
     // PAL: 50 frames a second.
     const LONGLONG period = g_frequency.QuadPart / 50;
     LARGE_INTEGER now;
@@ -244,6 +254,7 @@ void __cdecl main() {
     QueryPerformanceCounter(&g_next);
     init_display();
     init_input();
+    platform_audio_start();
     load_script();
 
     std::vector<uint8_t> image;

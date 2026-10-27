@@ -281,3 +281,4 @@ void hook_cd_poll();
 void hook_cd_stop();
 void hook_cd_fade_in();
 void hook_cd_fade_out();
+void hook_sound_voice();         // a0 = the voice's request, a3 = the sound bank, d0 = its DMA bits

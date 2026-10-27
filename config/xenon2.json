@@ -64,13 +64,13 @@
       "at": "0x4FD28",
       "kind": "hook",
       "name": "load_file",
-      "buffer": "0x88A48"
+      "buffer": "0x88A4C"
     },
     {
       "at": "0x4FD78",
       "kind": "hook",
       "name": "load_file",
-      "buffer": "0x88A48"
+      "buffer": "0x88A4C"
     },
     {
       "at": "0x50F68",
@@ -110,6 +110,11 @@
       "at": "0x3A8F6",
       "kind": "hook",
       "name": "cd_stop"
+    },
+    {
+      "at": "0x3351E",
+      "kind": "hook",
+      "name": "sound_voice"
     }
   ],
   "overlays": {

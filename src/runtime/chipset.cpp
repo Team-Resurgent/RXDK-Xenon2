@@ -31,6 +31,7 @@ u16 regs[256];               // custom registers by offset / 2, as written
 u16 dmacon, intena, intreq, adkcon;
 int line;                    // the beam's line
 u32 frame_count;
+int window_top = kScreenH, window_bottom = 0;   // the rows the display window opened on this frame
 
 inline u16 &reg(u32 offset) { return regs[(offset & 0x1FE) >> 1]; }
 inline u32 ptr(u32 offset) { return (u32(reg(offset)) << 16 | reg(offset + 2)) & 0x1FFFFE; }
@@ -391,6 +392,10 @@ void render_line() {
     const int planes = (con0 >> 12) & 7;
     const bool dual = con0 & 0x400, hires = con0 & 0x8000;
     const bool fetch = (dmacon & 0x300) == 0x300 && planes && line >= vstart && line < vstop && !hires;
+    if (visible && line >= vstart && line < vstop) {
+        if (y < window_top) window_top = y;
+        if (y + 1 > window_bottom) window_bottom = y + 1;
+    }
 
     // Playfield pixels of this line by beam position (lowres).
     static u8 pix[0x200];
@@ -472,7 +477,10 @@ void frame_done() {
                      "diw %04X-%04X ddf %04X-%04X bpl1pt %06X sr %04X a7 %06X\n", frame_count, g_last_resume, dmacon,
                      intena, intreq, reg(BPLCON0), ptr(COP1LCH), reg(DIWSTRT), reg(DIWSTOP), reg(DDFSTRT),
                      reg(DDFSTOP), ptr(BPL1PTH), rt_get_sr(), R.a[7]);
-    platform_frame(screen, kScreenW, kScreenH);
+    if (window_bottom <= window_top) window_top = 0, window_bottom = kScreenH;
+    platform_frame(screen, kScreenW, kScreenH, window_top, window_bottom);
+    window_top = kScreenH;
+    window_bottom = 0;
     joystick = platform_joystick();
     ++frame_count;
 }
