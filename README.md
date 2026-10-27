@@ -12,6 +12,10 @@
   <a href="https://www.patreon.com/teamresurgent"><img src="https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white" alt="Patreon"></a>
 </p>
 
+<p align="center">
+  <img src="docs/title.png" alt="Xenon 2 Megablast's title screen running in xemu" width="640">
+</p>
+
 The Bitmap Brothers' own 68000 code is statically recompiled to C++: the
 game logic is the original. The Amiga hardware it talks to is replaced by
 native code. File and CD access are hooked at the routines the WHDLoad
