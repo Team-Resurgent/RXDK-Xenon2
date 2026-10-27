@@ -1,0 +1,129 @@
+{
+  "_comment": "Xenon 2 CDTV (data/X2 loaded at $400). patches mirror Xenon2CDTV.Slave v1.7's patch list (absolute addresses): skip = bra to 'to', rts, hook = native code in src/runtime/hooks.cpp then continue at 'resume' (none = rts). entries = code reached only indirectly.",
+  "code": [
+    "0x400",
+    "0x6B09C"
+  ],
+  "entries": [
+    "0x400"
+  ],
+  "patches": [
+    {
+      "at": "0x3AA4A",
+      "kind": "skip",
+      "to": "0x3AAE8"
+    },
+    {
+      "at": "0x3AB2C",
+      "kind": "skip",
+      "to": "0x3AB40"
+    },
+    {
+      "at": "0x33930",
+      "kind": "hook",
+      "name": "load_file",
+      "buffer": "0x4E26",
+      "resume": "0x3395E"
+    },
+    {
+      "at": "0x3C7DE",
+      "kind": "hook",
+      "name": "load_file",
+      "pointer": "0x411E4",
+      "resume": "0x3C80C"
+    },
+    {
+      "at": "0x3D2A4",
+      "kind": "hook",
+      "name": "load_file",
+      "buffer": "0x4E26",
+      "resume": "0x3D2D2"
+    },
+    {
+      "at": "0x3D86E",
+      "kind": "hook",
+      "name": "load_file",
+      "buffer": "0x4E26",
+      "resume": "0x3D89C"
+    },
+    {
+      "at": "0x3E09A",
+      "kind": "hook",
+      "name": "load_file",
+      "buffer": "0x4E26",
+      "resume": "0x3E0C8"
+    },
+    {
+      "at": "0x411A8",
+      "kind": "hook",
+      "name": "load_file",
+      "pointer": "0x411E4",
+      "resume": "0x411D6"
+    },
+    {
+      "at": "0x4FD28",
+      "kind": "hook",
+      "name": "load_file",
+      "buffer": "0x88A48"
+    },
+    {
+      "at": "0x4FD78",
+      "kind": "hook",
+      "name": "load_file",
+      "buffer": "0x88A48"
+    },
+    {
+      "at": "0x50F68",
+      "kind": "hook",
+      "name": "load_file",
+      "pointer": "0x4E42",
+      "resume": "0x50F96"
+    },
+    {
+      "at": "0x50FCE",
+      "kind": "hook",
+      "name": "load_file",
+      "buffer": "0x4E26",
+      "resume": "0x3D2EE"
+    },
+    {
+      "at": "0x3A924",
+      "kind": "hook",
+      "name": "cd_play"
+    },
+    {
+      "at": "0x3A95C",
+      "kind": "hook",
+      "name": "cd_poll"
+    },
+    {
+      "at": "0x3A9BA",
+      "kind": "hook",
+      "name": "cd_fade_in"
+    },
+    {
+      "at": "0x3A9E6",
+      "kind": "hook",
+      "name": "cd_fade_out"
+    },
+    {
+      "at": "0x3A8F6",
+      "kind": "hook",
+      "name": "cd_stop"
+    }
+  ],
+  "overlays": {
+    "at": "0x4E26",
+    "end": "0x334B6",
+    "base": "0x406",
+    "files": [
+      "Intro",
+      "Piccode",
+      "Level1",
+      "Level2",
+      "Level3",
+      "Level4",
+      "Level5"
+    ]
+  }
+}

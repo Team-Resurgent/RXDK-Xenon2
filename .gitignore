@@ -1,0 +1,7 @@
+# Everything from the user's own install, and what is generated from it.
+/game/
+/build/
+/out/
+__pycache__/
+/gamecode/
+/rxdk.project.json
