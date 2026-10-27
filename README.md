@@ -3,6 +3,7 @@
 <p align="center"><b>Xenon 2 Megablast (the 1991 CDTV release) on the original Xbox — the Bitmap Brothers' own 68000 code recompiled to C++, with native sound and the Bomb the Bass CD soundtrack, built with RXDK</b></p>
 
 <p align="center">
+  <a href="https://github.com/Team-Resurgent/RXDK-Xenon2/blob/main/LICENSE.md"><img src="https://img.shields.io/badge/License-GPLv3-blue.svg" alt="License: GPL v3"></a>
   <a href="https://discord.gg/VcdSfajQGK"><img src="https://img.shields.io/badge/chat-on%20discord-7289da.svg?logo=discord" alt="Discord"></a>
 </p>
 
@@ -72,3 +73,10 @@ Still to do:
 
 D-pad or left stick to move. A or right trigger is button A (fire); B or X
 is the second button.
+
+## Licence
+
+The code in this repository is GPLv3 ([LICENSE.md](LICENSE.md)).
+[stb_vorbis](third_party/stb_vorbis) keeps its own licence (public domain,
+or MIT). Xenon 2 Megablast itself, its data and its music belong to their
+owners and are not covered: you supply your own copy.
