@@ -7,6 +7,7 @@
 
 #include "runtime/chipset.h"
 #include "runtime/cpu.h"
+#include "runtime/highscores.h"
 #include "runtime/platform.h"
 
 #include <cctype>
@@ -181,6 +182,31 @@ bool platform_read(const char *name, std::vector<uint8_t> &out) {
     return read_file(path, out);
 }
 
+// The save: a save game ("High Scores") on the hard disk's U:, so the
+// dashboard lists it.
+bool save_path(const char *name, char *path, size_t size) {
+    char dir[MAX_PATH];
+    if (XCreateSaveGame("U:\\", L"High Scores", OPEN_ALWAYS, 0, dir, sizeof(dir)) != ERROR_SUCCESS) return false;
+    std::snprintf(path, size, "%s%s", dir, name);     // dir ends in a backslash
+    return true;
+}
+
+bool platform_save_read(const char *name, std::vector<uint8_t> &out) {
+    char path[MAX_PATH];
+    return save_path(name, path, sizeof(path)) && read_file(path, out);
+}
+
+bool platform_save_write(const char *name, const void *data, size_t bytes) {
+    char path[MAX_PATH];
+    if (!save_path(name, path, sizeof(path))) return false;
+    HANDLE f = CreateFileA(path, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, 0, nullptr);
+    if (f == INVALID_HANDLE_VALUE) return false;
+    DWORD wrote = 0;
+    const BOOL ok = WriteFile(f, data, DWORD(bytes), &wrote, nullptr);
+    CloseHandle(f);
+    return ok && wrote == bytes;
+}
+
 // A test input script (D:\inputs.txt, from build/inputs.txt): lines of
 // "<from frame> <to frame> <buttons>", buttons any of U D L R F G (fire 1, 2).
 struct ScriptLine { u32 from, to; Joystick j; };
@@ -265,6 +291,7 @@ void __cdecl main() {
     chipset_reset();
     cpu_reset(0x400, kStack);
     wl(0x6C, kNativeVblank);
+    highscores_load();
     platform_log("xenon2: running\n");
     cpu_run();
 }

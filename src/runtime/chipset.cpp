@@ -5,6 +5,7 @@
 #include "runtime/chipset.h"
 
 #include "runtime/cpu.h"
+#include "runtime/highscores.h"
 #include "runtime/platform.h"
 
 #include <cstring>
@@ -479,6 +480,7 @@ void frame_done() {
                      reg(DDFSTOP), ptr(BPL1PTH), rt_get_sr(), R.a[7]);
     if (window_bottom <= window_top) window_top = 0, window_bottom = kScreenH;
     platform_frame(screen, kScreenW, kScreenH, window_top, window_bottom);
+    highscores_frame();
     window_top = kScreenH;
     window_bottom = 0;
     joystick = platform_joystick();

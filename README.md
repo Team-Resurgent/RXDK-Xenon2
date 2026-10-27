@@ -62,16 +62,17 @@ skips, the file loads, and the CDTV CD-audio calls (`cd_play` is track
 
 The game runs in xemu: the joypad and language screens, the intro with
 speech, high scores and Level 1 gameplay, with sound effects, speech and
-music. It draws through the reference renderer, which builds the frame from
-the bitplanes, sprites and copper as the Amiga would, centred on the screen.
+music. The high-score table is kept in a save game ("High Scores"), as the
+WHDLoad install keeps it in a file. It draws through the reference
+renderer, which builds the frame from the bitplanes, sprites and copper as
+the Amiga would, centred on the screen.
 
 Still to do:
 
 - **HD renderer:** native rendering at 480p/720p from the game's own draw
   calls, with HD textures (the Xenon 2000 art where it fits, upscaled
   originals elsewhere) and 60 Hz interpolation (the game updates every third
-  PAL frame).
-- **High scores:** saving them.
+  PAL frame). The design: [docs/hd-renderer.md](docs/hd-renderer.md).
 
 ## Controller
 

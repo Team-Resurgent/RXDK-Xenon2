@@ -1,6 +1,7 @@
 // What the runtime needs from the platform (src/platform/xbox).
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <vector>
 
@@ -9,6 +10,10 @@ void platform_log(const char *format, ...);
 
 // A file of the game's (D:\data\<name>, case-insensitive); false if missing.
 bool platform_read(const char *name, std::vector<uint8_t> &out);
+
+// The game's save (the high scores): a file of it, read or written whole.
+bool platform_save_read(const char *name, std::vector<uint8_t> &out);
+bool platform_save_write(const char *name, const void *data, size_t bytes);
 
 // The joystick in port 2: Amiga direction bits and two fire buttons.
 struct Joystick {
