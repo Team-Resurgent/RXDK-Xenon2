@@ -5,6 +5,7 @@
 #include "runtime/chipset.h"
 
 #include "runtime/cpu.h"
+#include "runtime/display.h"
 #include "runtime/highscores.h"
 #include "runtime/platform.h"
 
@@ -13,6 +14,10 @@
 // The reference picture; a named symbol so test tools can read it from xemu.
 extern "C" u32 xenon2_screen[kScreenW * kScreenH];
 u32 xenon2_screen[kScreenW * kScreenH];
+#ifdef XENON2_DISPLAY_BOXES
+extern "C" u32 xenon2_shown[kScreenW * kScreenH];
+u32 xenon2_shown[kScreenW * kScreenH];          // the last finished frame (the screen is redrawn line by line)
+#endif
 
 namespace {
 
@@ -33,6 +38,7 @@ u16 dmacon, intena, intreq, adkcon;
 int line;                    // the beam's line
 u32 frame_count;
 int window_top = kScreenH, window_bottom = 0;   // the rows the display window opened on this frame
+u32 shown_planes;                                // bitplane 1 at the frame's first line fetched (the buffer shown)
 
 inline u16 &reg(u32 offset) { return regs[(offset & 0x1FE) >> 1]; }
 inline u32 ptr(u32 offset) { return (u32(reg(offset)) << 16 | reg(offset + 2)) & 0x1FFFFE; }
@@ -401,6 +407,7 @@ void render_line() {
     // Playfield pixels of this line by beam position (lowres).
     static u8 pix[0x200];
     std::memset(pix, 0, sizeof(pix));
+    if (fetch && !shown_planes) shown_planes = ptr(BPL1PTH);
     if (fetch) {
         const int ddfstrt = reg(DDFSTRT) & 0xFC, ddfstop = reg(DDFSTOP) & 0xFC;
         const int words = ((ddfstop - ddfstrt) >> 3) + 1;
@@ -479,10 +486,16 @@ void frame_done() {
                      intena, intreq, reg(BPLCON0), ptr(COP1LCH), reg(DIWSTRT), reg(DIWSTOP), reg(DDFSTRT),
                      reg(DDFSTOP), ptr(BPL1PTH), rt_get_sr(), R.a[7]);
     if (window_bottom <= window_top) window_top = 0, window_bottom = kScreenH;
+#ifdef XENON2_DISPLAY_BOXES
+    display_debug_boxes(screen, kScreenW, kScreenH, window_top, shown_planes);
+    std::memcpy(xenon2_shown, screen, sizeof(xenon2_shown));   // as shown, for screenshots
+#endif
     platform_frame(screen, kScreenW, kScreenH, window_top, window_bottom);
     highscores_frame();
+    display_frame();
     window_top = kScreenH;
     window_bottom = 0;
+    shown_planes = 0;
     joystick = platform_joystick();
     ++frame_count;
 }

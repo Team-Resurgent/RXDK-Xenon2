@@ -199,6 +199,8 @@ class Gen:
                 self.emit(f"    goto {self.label(f.entry)};")
             self.emit(f"{self.label(a)}:")
             self.emit(f"    /* {a:06x}: {insn.text()} */")
+            if "probe" in insn.extra:
+                self.emit(f"    probe_{insn.extra['probe']}();")
             self.emit(f"    R.cyc += {cycles(insn)};")
             body_start = len(self.out)
             try:

@@ -92,6 +92,10 @@ def decode_patched(config: dict, memory: bytes, address: int) -> Insn:
             return Insn(address, 2, "rts")
         if kind == "hook":       # native code, then on at patch["resume"] (or rts)
             return Insn(address, 6, "hook", extra=patch)
+        if kind == "probe":      # native code first, then the instruction as it is
+            insn = decode(memory, address)
+            insn.extra["probe"] = patch["name"]
+            return insn
     return decode(memory, address)
 
 

@@ -1,5 +1,5 @@
 {
-  "_comment": "Xenon 2 CDTV (data/X2 loaded at $400). patches mirror Xenon2CDTV.Slave v1.7's patch list (absolute addresses): skip = bra to 'to', rts, hook = native code in src/runtime/hooks.cpp then continue at 'resume' (none = rts). entries = code reached only indirectly.",
+  "_comment": "Xenon 2 CDTV (data/X2 loaded at $400). patches mirror Xenon2CDTV.Slave v1.7's patch list (absolute addresses): skip = bra to 'to', rts, hook = native code in src/runtime/hooks.cpp then continue at 'resume' (none = rts), probe = native code (src/runtime/display.cpp) before the instruction, which runs as it is. entries = code reached only indirectly.",
   "code": [
     "0x400",
     "0x6B09C"
@@ -115,6 +115,26 @@
       "at": "0x3351E",
       "kind": "hook",
       "name": "sound_voice"
+    },
+    {
+      "at": "0x346B2",
+      "kind": "probe",
+      "name": "update"
+    },
+    {
+      "at": "0x3414E",
+      "kind": "probe",
+      "name": "object"
+    },
+    {
+      "at": "0x34230",
+      "kind": "probe",
+      "name": "object_flash"
+    },
+    {
+      "at": "0x34314",
+      "kind": "probe",
+      "name": "object_masked"
     }
   ],
   "overlays": {

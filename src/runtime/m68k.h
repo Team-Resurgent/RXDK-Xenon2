@@ -282,3 +282,9 @@ void hook_cd_stop();
 void hook_cd_fade_in();
 void hook_cd_fade_out();
 void hook_sound_voice();         // a0 = the voice's request, a3 = the sound bank, d0 = its DMA bits
+
+// Probes (display.cpp): called before the instruction at their address.
+void probe_update();             // $346B2: an update's drawing starts
+void probe_object();             // $3414E: d0 = x, d1 = y, a0 = graphic
+void probe_object_flash();       // $34230: the same, drawn in one colour
+void probe_object_masked();      // $34314: the same, through a mask

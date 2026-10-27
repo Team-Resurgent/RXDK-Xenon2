@@ -23,10 +23,19 @@ The screen buffer is at `($408)`, interleaved: `$A0` bytes a line.
 
 ## Plan
 
-1. **Display list.** Hooks at the layer routines record, every game update,
-   the back layer's scroll row, the wall map position, and each object
-   drawn: (graphics pointer, x, y, routine, object record). The original
-   blits still run, so the reference renderer stays a check.
+1. **Display list (done).** Probes (`config/xenon2.json`, kind `probe`:
+   native code before an instruction, which then runs as it is) at `$346B2`
+   and the object draws (`$3414E`, `$34230`, `$34314`) build a list per
+   update in `src/runtime/display.cpp`: the back layer's scroll row, the
+   wall map position, and each object's graphic, x and y. The original
+   blits still run, so the reference renderer stays a check:
+   `python tools/build.py --boxes` draws each object's box over it.
+   Checked in Level 1: the boxes sit on the ship, enemies, bullets,
+   pickups and the score panel's icons. The game double-buffers at
+   `$06B0A0` and `$077B20` (200 lines of `$A0` bytes); a list belongs to
+   the buffer the bitplanes start the frame at, and lapses when updates
+   stop (the title, shop and table screens draw without them). The wall
+   turrets are wall tiles, not objects.
 2. **Textures.** Each graphics pointer decoded once (planar to RGBA, with
    the palette from the colour registers and the copper) and cached; the
    back layer and the tile set as textures of their own.
