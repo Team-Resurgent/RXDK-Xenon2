@@ -122,6 +122,11 @@
       "name": "update"
     },
     {
+      "at": "0x35268",
+      "kind": "probe",
+      "name": "stars"
+    },
+    {
       "at": "0x3414E",
       "kind": "probe",
       "name": "object"

@@ -63,9 +63,17 @@ skips, the file loads, and the CDTV CD-audio calls (`cd_play` is track
 The game runs in xemu: the joypad and language screens, the intro with
 speech, high scores and Level 1 gameplay, with sound effects, speech and
 music. The high-score table is kept in a save game ("High Scores"), as the
-WHDLoad install keeps it in a file. It draws through the reference
-renderer, which builds the frame from the bitplanes, sprites and copper as
-the Amiga would, centred on the screen.
+WHDLoad install keeps it in a file. In play, the playfield is drawn
+natively from what the game draws (its back layer, wall tiles, stars and
+objects, as D3D quads); the rest, and the score panel, come from the
+reference renderer, which builds the frame from the bitplanes, sprites and
+copper as the Amiga would. The picture is centred on the screen; hold Back
+to see the reference picture alone.
+
+Of the CDTV disc's music, the game plays track 2 on the title screens,
+tracks 3, 5, 2, 3 and 5 in levels 1 to 5, and tracks 8 to 13 with the
+picture show (the `Picdata` pictures). Tracks 4, 6 and 7 aren't used by
+the game's code.
 
 Still to do:
 

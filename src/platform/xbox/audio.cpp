@@ -77,7 +77,7 @@ DWORD WINAPI audio_thread(void *) {
             DWORD play = 0, write = 0;
             g_buffer->GetCurrentPosition(&play, &write);
             g_write = (play / kBlockBytes + 2) % kBlocks * kBlockBytes;
-            ++g_resyncs;
+            if (++g_resyncs <= 20) platform_log("audio: fell behind (%u)\n", g_resyncs);
         } else if (ahead >= kAheadBlocks * kBlockBytes) {
             Sleep(2);
             continue;

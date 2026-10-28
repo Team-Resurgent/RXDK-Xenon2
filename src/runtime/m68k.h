@@ -285,6 +285,7 @@ void hook_sound_voice();         // a0 = the voice's request, a3 = the sound ban
 
 // Probes (display.cpp): called before the instruction at their address.
 void probe_update();             // $346B2: an update's drawing starts
+void probe_stars();              // $35268: the stars have moved
 void probe_object();             // $3414E: d0 = x, d1 = y, a0 = graphic
 void probe_object_flash();       // $34230: the same, drawn in one colour
 void probe_object_masked();      // $34314: the same, through a mask

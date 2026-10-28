@@ -9,6 +9,7 @@
 #include "runtime/cpu.h"
 #include "runtime/highscores.h"
 #include "runtime/platform.h"
+#include "platform/xbox/renderer.h"
 
 #include <cctype>
 #include <cmath>
@@ -29,6 +30,16 @@ DWORD g_connected;
 XINPUT_POLLING_PARAMETERS g_polling;
 LARGE_INTEGER g_frequency, g_next;
 u32 g_frames;
+bool g_reference;                        // Back held: the reference picture alone
+
+} // namespace
+
+#ifdef XENON2_DISPLAY_CHECK
+extern "C" uint32_t xenon2_tv[640 * 480];
+uint32_t xenon2_tv[640 * 480];
+#endif
+
+namespace {
 
 void init_display() {
     IDirect3D8 *d3d = Direct3DCreate8(D3D_SDK_VERSION);
@@ -45,6 +56,7 @@ void init_display() {
         platform_fatal("CreateDevice failed");
     if (FAILED(g_device->CreateTexture(512, 256, 1, 0, D3DFMT_LIN_X8R8G8B8, 0, &g_screen)))
         platform_fatal("no memory for the screen texture");
+    renderer_init(g_device);
 }
 
 void open_pads() {
@@ -119,6 +131,23 @@ void draw(const uint32_t *pixels, int width, int height, int top, int bottom) {
     g_device->SetTextureStageState(1, D3DTSS_COLOROP, D3DTOP_DISABLE);
     g_device->SetVertexShader(D3DFVF_XYZRHW | D3DFVF_TEX1);
     g_device->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, quad, sizeof(Vertex));
+    // The playfield natively over it (the score panel stays the picture's);
+    // with Back held, the reference picture alone.
+    if (!g_reference) renderer_draw_playfield(kWidth / w, y0, scale);
+#ifdef XENON2_DISPLAY_CHECK
+    // The screen as drawn, for screenshots (xemu can't take them over its
+    // monitor): now and then, as reading it back is slow.
+    IDirect3DSurface8 *back = nullptr;
+    if (g_frames % 25 == 0 && (g_device->BlockUntilIdle(), SUCCEEDED(g_device->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &back)))) {
+        D3DLOCKED_RECT locked;
+        if (SUCCEEDED(back->LockRect(&locked, nullptr, D3DLOCK_READONLY))) {
+            for (UINT y = 0; y < kHeight; ++y)
+                std::memcpy(xenon2_tv + y * kWidth, static_cast<uint8_t *>(locked.pBits) + size_t(y) * locked.Pitch, kWidth * 4);
+            back->UnlockRect();
+        }
+        back->Release();
+    }
+#endif
     g_device->SetTexture(0, nullptr);
     g_device->Present(nullptr, nullptr, nullptr, nullptr);
 }
@@ -241,6 +270,7 @@ Joystick platform_joystick() {
         return j;
     }
     const XINPUT_GAMEPAD pad = read_pad();
+    g_reference = pad.wButtons & XINPUT_GAMEPAD_BACK;
     const SHORT x = pad.sThumbLX, y = pad.sThumbLY;
     const auto analog = [&](int index) { return pad.bAnalogButtons[index] > 30; };
     Joystick j;

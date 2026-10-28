@@ -54,7 +54,7 @@ def write_project(directory: Path, project: dict) -> None:
         path.write_text(text)
 
 
-def projects(boxes: bool) -> None:
+def projects(defines: list) -> None:
     generated = BUILD / "m68k"
     sources = json.loads((generated / "sources.json").read_text())
     gamecode = ROOT / "gamecode"
@@ -71,13 +71,13 @@ def projects(boxes: bool) -> None:
         "includePaths": ["src", "build/m68k", "third_party"],
         "projectReferences": ["gamecode"],
         "libraries": LIBRARIES,
-        "compileFlags": FLAGS + (["-DXENON2_DISPLAY_BOXES"] if boxes else []),
+        "compileFlags": FLAGS + [f"-D{d}" for d in defines],
         "cppStandard": "c++20", "outputDir": "out",
         "deployPaths": ["image.bin=build/image.bin", "data=game/data"]
         + (["music=game/music"] if (ROOT / "game/music").exists() else [])
         # A test input script (src/platform/xbox/main.cpp), only when there is one.
         + (["inputs.txt=build/inputs.txt"] if (BUILD / "inputs.txt").exists() else []),
-        "imageBuild": {"testName": "Xenon 2 Megablast"}})
+        "imageBuild": {"testName": "Xenon 2 Megablast", "testId": "0x54520017"}})
 
 
 def main() -> int:
@@ -85,6 +85,7 @@ def main() -> int:
     parser.add_argument("--install", type=Path, help="your Xenon 2 CDTV WHDLoad install (.lha or folder), once")
     parser.add_argument("--music", type=Path, help="the Xenon2Audio add-on (.lha, folder or BTB.8svx), once")
     parser.add_argument("--boxes", action="store_true", help="debug: draw the display list's objects as boxes")
+    parser.add_argument("--check", action="store_true", help="debug: log how the composed display list differs from the picture")
     parser.add_argument("--no-xbox", action="store_true", help="stop after recompiling")
     args = parser.parse_args()
     if args.install or not (ROOT / "game/data/X2").exists() or not (BUILD / "image.bin").exists():
@@ -96,7 +97,7 @@ def main() -> int:
     run([sys.executable, ROOT / "tools/recompile.py"])
     if args.no_xbox:
         return 0
-    projects(args.boxes)
+    projects([d for d, on in (("XENON2_DISPLAY_BOXES", args.boxes), ("XENON2_DISPLAY_CHECK", args.check)) if on])
     # The RXDK build keeps staged files that left the manifest: a test input
     # script must not stay on the disc once build/inputs.txt is gone.
     if not (BUILD / "inputs.txt").exists():
